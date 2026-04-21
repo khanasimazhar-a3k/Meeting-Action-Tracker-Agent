@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MMG — Meeting Action Submitter</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #f4f6f9; min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 20px; }
+  .card { background: #fff; border-radius: 14px; box-shadow: 0 2px 20px rgba(0,0,0,0.10); max-width: 560px; width: 100%; padding: 28px 28px 32px; margin-top: 20px; }
+  .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
+  .logo-box { width: 36px; height: 36px; background: #1D3557; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .logo-box span { color: #fff; font-weight: 700; font-size: 14px; }
+  .logo-text { font-size: 15px; font-weight: 600; color: #1D3557; }
+  .logo-sub { font-size: 12px; color: #6b7280; }
+  h2 { font-size: 18px; font-weight: 600; color: #111827; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; color: #6b7280; margin-bottom: 22px; }
+  label { display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 5px; letter-spacing: 0.03em; text-transform: uppercase; }
+  input, select, textarea { width: 100%; border: 1.5px solid #e5e7eb; border-radius: 8px; padding: 10px 12px; font-size: 14px; color: #111827; background: #fff; outline: none; transition: border-color .15s; margin-bottom: 16px; font-family: inherit; }
+  input:focus, select:focus, textarea:focus { border-color: #1D3557; }
+  textarea { resize: vertical; min-height: 120px; line-height: 1.6; }
+  .input-method-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+  .tab-btn { flex: 1; padding: 9px 0; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; background: #f9fafb; color: #6b7280; transition: all .15s; }
+  .tab-btn.active { background: #1D3557; color: #fff; border-color: #1D3557; }
+  .voice-panel { background: #f0f4f8; border-radius: 10px; padding: 18px; margin-bottom: 16px; text-align: center; }
+  .mic-btn { width: 68px; height: 68px; border-radius: 50%; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 26px; transition: all .2s; margin-bottom: 12px; background: #1D3557; }
+  .mic-btn:hover { transform: scale(1.05); }
+  .mic-btn.recording { background: #dc2626; animation: pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.4)} 50%{box-shadow:0 0 0 12px rgba(220,38,38,0)} }
+  .mic-status { font-size: 13px; color: #6b7280; margin-bottom: 8px; }
+  .mic-status.listening { color: #dc2626; font-weight: 600; }
+  .live-preview { font-size: 13px; color: #374151; background: #fff; border-radius: 6px; padding: 8px 10px; min-height: 36px; border: 1px solid #e5e7eb; text-align: left; line-height: 1.5; margin-top: 8px; }
+  .use-transcript-btn { margin-top: 10px; padding: 7px 18px; background: #1D3557; color: #fff; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; display: none; }
+  .use-transcript-btn:hover { background: #152d48; }
+  .submit-btn { width: 100%; padding: 13px; background: #1D3557; color: #fff; border: none; border-radius: 9px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background .15s; margin-top: 4px; }
+  .submit-btn:hover { background: #152d48; }
+  .submit-btn:disabled { background: #9ca3af; cursor: not-allowed; }
+  .success-msg { display: none; text-align: center; padding: 20px; }
+  .success-msg .icon { font-size: 40px; margin-bottom: 10px; }
+  .success-msg p { color: #374151; font-size: 14px; }
+  .required { color: #dc2626; }
+  .char-count { font-size: 11px; color: #9ca3af; text-align: right; margin-top: -12px; margin-bottom: 16px; }
+  .browser-note { font-size: 11px; color: #9ca3af; margin-top: 8px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="logo-box"><span>M</span></div>
+    <div><div class="logo-text">MMG Group</div><div class="logo-sub">Meeting Action Submitter</div></div>
+  </div>
+
+  <h2>Submit Meeting Actions</h2>
+  <p class="subtitle">Actions are automatically extracted, confirmed with you, then tracked until completion.</p>
+
+  <div id="form-section">
+    <div class="row">
+      <div>
+        <label>Your Name <span class="required">*</span></label>
+        <input type="text" id="senderName" placeholder="Ahmed Al-Zahrani">
+      </div>
+      <div>
+        <label>Your Email <span class="required">*</span></label>
+        <input type="email" id="senderEmail" placeholder="ahmed@mmg-group.com">
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Meeting Title <span class="required">*</span></label>
+        <input type="text" id="meetingTitle" placeholder="e.g. Weekly Operations Review">
+      </div>
+      <div>
+        <label>Meeting Date <span class="required">*</span></label>
+        <input type="date" id="meetingDate">
+      </div>
+    </div>
+
+    <label>Department</label>
+    <select id="department">
+      <option value="">Select department</option>
+      <option>Operations</option><option>Projects & EPC</option><option>Finance</option>
+      <option>HR</option><option>Procurement</option><option>Fleet</option>
+      <option>HSE</option><option>Barley Division</option><option>Head Office</option>
+    </select>
+
+    <label>How would you like to submit the summary?</label>
+    <div class="input-method-tabs">
+      <button class="tab-btn active" onclick="switchTab('text', this)">&#9998; Type Summary</button>
+      <button class="tab-btn" onclick="switchTab('voice', this)">&#127908; Record Voice Note</button>
+    </div>
+
+    <div id="text-panel">
+      <label>Meeting Summary <span class="required">*</span></label>
+      <textarea id="summaryText" placeholder="List the action items from your meeting. Include: what needs to be done, who is responsible, and by when.&#10;&#10;Example:&#10;Ahmed to submit Q2 revenue report to Finance by Thursday.&#10;Khalid to confirm Iqama renewal list for JIP crew by Wednesday.&#10;Omar to get 3 supplier quotes for XLPE cable by next Monday." oninput="updateCharCount()"></textarea>
+      <div class="char-count" id="charCount">0 characters</div>
+    </div>
+
+    <div id="voice-panel" style="display:none;">
+      <div class="voice-panel">
+        <button class="mic-btn" id="micBtn" onclick="toggleRecording()">&#127908;</button>
+        <div class="mic-status" id="micStatus">Tap the microphone to start recording</div>
+        <div class="live-preview" id="livePreview">Your speech will appear here as you speak...</div>
+        <button class="use-transcript-btn" id="useTranscriptBtn" onclick="useTranscript()">Use this transcript &#10003;</button>
+        <p class="browser-note">Works best on Chrome (Android) and Safari (iPhone). Speak clearly in English or Arabic.</p>
+      </div>
+      <label>Transcript (edit if needed before submitting)</label>
+      <textarea id="voiceTranscript" placeholder="Transcript will appear here after recording. You can edit it before submitting." style="min-height:100px;"></textarea>
+    </div>
+
+    <button class="submit-btn" id="submitBtn" onclick="submitForm()">Submit Meeting Actions</button>
+  </div>
+
+  <div class="success-msg" id="successMsg">
+    <div class="icon">&#10003;</div>
+    <h2 style="margin-bottom:8px;">Submitted successfully</h2>
+    <p>You will receive a confirmation email within a few minutes with the extracted action items for your review. Once you reply <strong>CONFIRM</strong>, each owner will be notified automatically.</p>
+  </div>
+</div>
+
+<script>
+const N8N_WEBHOOK_URL = 'https://aiaa1.datasciencemasterminds.com/webhook/mmg-meeting-action';
+
+let recognition = null;
+let isRecording = false;
+let fullTranscript = '';
+let currentTab = 'text';
+
+// Set today as default date
+document.getElementById('meetingDate').valueAsDate = new Date();
+
+function switchTab(tab, btn) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('text-panel').style.display = tab === 'text' ? '' : 'none';
+  document.getElementById('voice-panel').style.display = tab === 'voice' ? '' : 'none';
+}
+
+function updateCharCount() {
+  const len = document.getElementById('summaryText').value.length;
+  document.getElementById('charCount').textContent = len + ' characters';
+}
+
+function toggleRecording() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    alert('Voice recording requires Chrome on Android or Safari on iPhone. Please use the text option or switch browser.');
+    return;
+  }
+  if (isRecording) {
+    stopRecording();
+  } else {
+    startRecording();
+  }
+}
+
+function startRecording() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = navigator.language || 'en-US';
+
+  fullTranscript = '';
+  document.getElementById('livePreview').textContent = '';
+  document.getElementById('useTranscriptBtn').style.display = 'none';
+
+  recognition.onresult = function(event) {
+    let interim = '';
+    let final = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const txt = event.results[i][0].transcript;
+      if (event.results[i].isFinal) { final += txt + ' '; }
+      else { interim += txt; }
+    }
+    fullTranscript += final;
+    document.getElementById('livePreview').textContent = fullTranscript + interim;
+  };
+
+  recognition.onerror = function(e) {
+    document.getElementById('micStatus').textContent = 'Error: ' + e.error + '. Try again.';
+    stopRecording();
+  };
+
+  recognition.onend = function() {
+    if (isRecording) recognition.start();
+  };
+
+  recognition.start();
+  isRecording = true;
+  document.getElementById('micBtn').classList.add('recording');
+  document.getElementById('micBtn').textContent = '⏹';
+  document.getElementById('micStatus').textContent = 'Recording... tap to stop';
+  document.getElementById('micStatus').classList.add('listening');
+}
+
+function stopRecording() {
+  if (recognition) recognition.stop();
+  isRecording = false;
+  document.getElementById('micBtn').classList.remove('recording');
+  document.getElementById('micBtn').textContent = '🎙';
+  document.getElementById('micStatus').textContent = 'Recording stopped. Review and edit below.';
+  document.getElementById('micStatus').classList.remove('listening');
+  if (fullTranscript.trim()) {
+    document.getElementById('useTranscriptBtn').style.display = 'inline-block';
+  }
+}
+
+function useTranscript() {
+  document.getElementById('voiceTranscript').value = fullTranscript.trim();
+  document.getElementById('useTranscriptBtn').style.display = 'none';
+}
+
+async function submitForm() {
+  const name = document.getElementById('senderName').value.trim();
+  const email = document.getElementById('senderEmail').value.trim();
+  const title = document.getElementById('meetingTitle').value.trim();
+  const date = document.getElementById('meetingDate').value;
+  const dept = document.getElementById('department').value;
+
+  const summaryText = currentTab === 'text'
+    ? document.getElementById('summaryText').value.trim()
+    : document.getElementById('voiceTranscript').value.trim();
+
+  if (!name || !email || !title || !summaryText) {
+    alert('Please fill in all required fields (name, email, meeting title, and the meeting summary).');
+    return;
+  }
+  if (summaryText.length < 20) {
+    alert('Please provide a more detailed summary — at least one action item with an owner and deadline.');
+    return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+
+  try {
+    const response = await fetch(N8N_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ senderName: name, senderEmail: email, meetingTitle: title, meetingDate: date, department: dept, summaryText })
+    });
+
+    if (response.ok || response.status === 200) {
+      document.getElementById('form-section').style.display = 'none';
+      document.getElementById('successMsg').style.display = 'block';
+    } else {
+      throw new Error('Server error: ' + response.status);
+    }
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Submit Meeting Actions';
+    alert('Submission failed. Please check your network connection and try again.\n\nError: ' + err.message);
+  }
+}
+</script>
+</body>
+</html>
